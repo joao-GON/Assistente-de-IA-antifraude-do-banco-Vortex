@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Vórtex · Central de Fraudes</title>
+<style>
+  :root {
+    --azul-profundo: #0B1B2B;
+    --azul-painel: #10233A;
+    --azul-borda: #1E3A56;
+    --teal: #2FBFA3;
+    --teal-escuro: #1E8F79;
+    --texto-claro: #EAF2F6;
+    --texto-suave: #93A9BC;
+    --alerta: #E8A33D;
+    --risco: #E2604F;
+    --fonte-ui: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --fonte-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: radial-gradient(ellipse at top, #122942 0%, var(--azul-profundo) 55%);
+    color: var(--texto-claro);
+    font-family: var(--fonte-ui);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 28px 16px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 760px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ---------- header ---------- */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+  }
+
+  .marca h1 {
+    margin: 0;
+    font-size: 20px;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+  }
+  .marca h1 span { color: var(--teal); }
+
+  .marca p {
+    margin: 2px 0 0;
+    font-size: 12.5px;
+    color: var(--texto-suave);
+  }
+
+  /* ---------- faixa de status ---------- */
+  .status-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--azul-borda);
+    border: 1px solid var(--azul-borda);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .status-item {
+    background: var(--azul-painel);
+    padding: 10px 12px;
+  }
+
+  .status-item .valor {
+    font-family: var(--fonte-mono);
+    font-size: 15px;
+    color: var(--teal);
+    font-weight: 600;
+  }
+
+  .status-item .rotulo {
+    font-size: 10.5px;
+    color: var(--texto-suave);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-top: 2px;
+  }
+
+  .pulso {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--teal);
+    margin-right: 6px;
+    box-shadow: 0 0 0 0 rgba(47,191,163,0.6);
+    animation: pulsar 2s infinite;
+  }
+
+  @keyframes pulsar {
+    0%   { box-shadow: 0 0 0 0 rgba(47,191,163,0.55); }
+    70%  { box-shadow: 0 0 0 8px rgba(47,191,163,0); }
+    100% { box-shadow: 0 0 0 0 rgba(47,191,163,0); }
+  }
+
+  /* ---------- toggle de modo ---------- */
+  .modo-toggle {
+    display: flex;
+    background: var(--azul-painel);
+    border: 1px solid var(--azul-borda);
+    border-radius: 10px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .modo-btn {
+    flex: 1;
+    text-align: center;
+    padding: 9px 10px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--texto-suave);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .modo-btn.ativo {
+    background: var(--teal);
+    color: #04211B;
+  }
+
+  .modo-desc {
+    font-size: 11.5px;
+    color: var(--texto-suave);
+    padding: 0 4px;
+    margin-top: -6px;
+  }
+
+  /* ---------- chat ---------- */
+  .chat-shell {
+    background: var(--azul-painel);
+    border: 1px solid var(--azul-borda);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    height: 460px;
+  }
+
+  .mensagens {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .msg {
+    max-width: 82%;
+    padding: 10px 13px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+
+  .msg.usuario {
+    align-self: flex-end;
+    background: var(--teal-escuro);
+    color: #F1FBF9;
+    border-bottom-right-radius: 3px;
+  }
+
+  .msg.assistente {
+    align-self: flex-start;
+    background: #16304A;
+    border: 1px solid var(--azul-borda);
+    color: var(--texto-claro);
+    border-bottom-left-radius: 3px;
+  }
+
+  .msg.sistema {
+    align-self: center;
+    color: var(--texto-suave);
+    font-size: 12px;
+    font-style: italic;
+  }
+
+  .digitando {
+    align-self: flex-start;
+    display: flex;
+    gap: 4px;
+    padding: 12px 14px;
+  }
+  .digitando span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--texto-suave);
+    animation: piscar 1.1s infinite ease-in-out;
+  }
+  .digitando span:nth-child(2) { animation-delay: 0.15s; }
+  .digitando span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes piscar { 0%,80%,100% { opacity: 0.25; } 40% { opacity: 1; } }
+
+  /* ---------- chips de sugestão ---------- */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 18px 12px;
+  }
+
+  .chip {
+    font-size: 12px;
+    padding: 6px 11px;
+    background: transparent;
+    border: 1px solid var(--azul-borda);
+    color: var(--texto-suave);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .chip:hover { border-color: var(--teal); color: var(--teal); }
+
+  /* ---------- input ---------- */
+  .input-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid var(--azul-borda);
+  }
+
+  .input-row textarea {
+    flex: 1;
+    resize: none;
+    background: var(--azul-profundo);
+    border: 1px solid var(--azul-borda);
+    border-radius: 9px;
+    color: var(--texto-claro);
+    padding: 10px 12px;
+    font-family: var(--fonte-ui);
+    font-size: 13.5px;
+    height: 42px;
+    line-height: 1.3;
+  }
+  .input-row textarea:focus { outline: 2px solid var(--teal); outline-offset: 1px; }
+
+  .enviar-btn {
+    background: var(--teal);
+    color: #04211B;
+    border: none;
+    border-radius: 9px;
+    padding: 0 18px;
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: pointer;
+  }
+  .enviar-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .rodape-aviso {
+    font-size: 10.5px;
+    color: var(--texto-suave);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="header">
+    <svg class="logo" viewBox="0 0 48 48" fill="none">
+      <circle cx="24" cy="24" r="22" stroke="#2FBFA3" stroke-width="2"/>
+      <path d="M24 10L36 16V24C36 32 30.5 37 24 39C17.5 37 12 32 12 24V16L24 10Z" stroke="#2FBFA3" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M18 24L22 28L30 19" stroke="#EAF2F6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="marca">
+      <h1>Banco <span>Vórtex</span></h1>
+      <p>Central de Fraudes · assistente de IA (protótipo fictício)</p>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-item"><div class="valor"><span class="pulso"></span>20.000</div><div class="rotulo">transações/mês</div></div>
+    <div class="status-item"><div class="valor">2,0%</div><div class="rotulo">taxa de fraude</div></div>
+    <div class="status-item"><div class="valor">97%</div><div class="rotulo">recall do modelo</div></div>
+    <div class="status-item"><div class="valor">99%</div><div class="rotulo">precisão do modelo</div></div>
+  </div>
+
+  <div class="modo-toggle">
+    <button class="modo-btn ativo" id="btn-cliente" onclick="mudarModo('cliente')">Sou cliente</button>
+    <button class="modo-btn" id="btn-profissional" onclick="mudarModo('profissional')">Sou profissional do banco</button>
+  </div>
+  <div class="modo-desc" id="modo-desc">Linguagem simples, sem jargão técnico, focada em o que fazer.</div>
+
+  <div class="chat-shell">
+    <div class="mensagens" id="mensagens"></div>
+    <div class="chips" id="chips"></div>
+    <div class="input-row">
+      <textarea id="entrada" placeholder="Digite sua dúvida sobre fraudes..."></textarea>
+      <button class="enviar-btn" id="btn-enviar" onclick="enviarMensagem()">Enviar</button>
+    </div>
+  </div>
+
+  <div class="rodape-aviso">
+    Banco Vórtex é uma instituição fictícia criada para fins de demonstração. Este assistente não acessa contas reais e não substitui os canais oficiais de contestação de fraude.
+  </div>
+
+</div>
+
+<script>
+// ---------------------------------------------------------------------
+// Contexto factual (fictício) do banco, derivado do modelo de detecção
+// de fraudes construído anteriormente. Isso é injetado no system prompt
+// para que o assistente responda com números consistentes.
+// ---------------------------------------------------------------------
+const CONTEXTO_DADOS = `
+Dados operacionais do mês (Banco Vórtex, fictício):
+- 20.000 transações analisadas; 400 identificadas como fraude confirmada (taxa de 2,0%).
+- Valor médio de uma transação fraudulenta: R$ 734,70. Valor médio de uma transação legítima: R$ 160,26.
+- O modelo de IA (Random Forest) usado para sinalizar transações suspeitas atinge, no conjunto de teste, 97% de recall (captura 97% das fraudes reais) e 99% de precisão (poucos falsos positivos).
+- Principais sinais que aumentam o risco calculado: valor da transação muito acima da média do cliente, horário de madrugada (0h-6h ou 22h-24h), grande distância entre a localização da transação e a do titular do cartão, e alta frequência de transações na última hora.
+- Categorias de estabelecimento com maior incidência de fraude: eletrônicos e assinaturas digitais.
+- Existe também uma regra de negócio simples (baseline) que sinaliza transações que combinam valor alto + madrugada + distância alta; ela sozinha já captura cerca de 71% das fraudes, mas o modelo de machine learning é mais preciso.
+`;
+
+const PROMPTS = {
+  cliente: `Você é o assistente de atendimento do Banco Vórtex (banco fictício), falando diretamente com um CLIENTE que tem dúvidas sobre fraude na conta ou no cartão.
+
+Regras de tom e conteúdo:
+- Use linguagem simples, calma e acolhedora. Evite jargão técnico (não fale em "recall", "modelo", "score", "Random Forest", "precisão estatística" etc.).
+- Seja prático: explique o que o cliente deve fazer passo a passo (ex: contestar a transação, bloquear o cartão, prazos, canais de contato).
+- Tranquilize sem minimizar: reconheça a preocupação da pessoa antes de explicar o processo.
+- Nunca peça dados sensíveis (senha, código de cartão completo, etc.) e avise se o cliente compartilhar algo assim, dizendo que ele não deve enviar esse tipo de dado.
+- Não invente número de protocolo, política de reembolso específica ou prazo legal exato — fale em termos gerais e recomende confirmar no aplicativo/central oficial.
+- Você pode usar os números operacionais gerais abaixo apenas se forem relevantes para tranquilizar o cliente (ex: "nosso sistema monitora todas as transações 24h"), sem entrar em detalhes técnicos do modelo.
+- Deixe claro, se perguntado, que o Banco Vórtex é fictício e este é um assistente de demonstração.
+
+Contexto de dados (uso interno, não despeje tudo isso na resposta):
+${CONTEXTO_DADOS}`,
+
+  profissional: `Você é o assistente interno do Banco Vórtex (banco fictício), apoiando um PROFISSIONAL do banco (analista de fraude, atendimento, risco ou compliance) a entender a situação de fraudes e o funcionamento do sistema de detecção.
+
+Regras de tom e conteúdo:
+- Pode usar linguagem técnica: métricas de classificação (precisão, recall, F1, ROC-AUC), variáveis do modelo, desbalanceamento de classes, limiares de decisão, etc.
+- Seja específico e cite os números operacionais fornecidos abaixo quando relevante.
+- Ajude a interpretar o score/probabilidade de risco de uma transação e sugira próximos passos operacionais (ex: revisão manual, bloqueio preventivo, contato com o cliente, escalonamento).
+- Pode discutir limitações do modelo (ex: dataset sintético/desbalanceado, necessidade de revalidação periódica, risco de vazamento de dados no treino, drift de padrões de fraude ao longo do tempo).
+- Não invente números que não estão no contexto fornecido; se não souber algo específico do banco (ex: política interna exata), diga que isso deve ser confirmado com a área responsável.
+- Deixe claro, se perguntado, que o Banco Vórtex é fictício e os dados são de um projeto de demonstração.
+
+Contexto de dados (uso interno, cite quando relevante):
+${CONTEXTO_DADOS}`
+};
+
+const CHIPS = {
+  cliente: [
+    "Notei uma cobrança que não reconheço, o que eu faço?",
+    "Meu cartão pode ter sido clonado, e agora?",
+    "Como o banco identifica uma fraude?",
+    "Vou ficar sem acesso à conta durante a análise?"
+  ],
+  profissional: [
+    "Como interpretar o score de risco de uma transação?",
+    "Quais variáveis mais pesam na decisão do modelo?",
+    "O que fazer com um caso de falso positivo recorrente?",
+    "Quais são as limitações atuais do modelo?"
+  ]
+};
+
+let modoAtual = "cliente";
+let historico = []; // {role, content}
+
+function mudarModo(modo) {
+  modoAtual = modo;
+  document.getElementById("btn-cliente").classList.toggle("ativo", modo === "cliente");
+  document.getElementById("btn-profissional").classList.toggle("ativo", modo === "profissional");
+  document.getElementById("modo-desc").textContent = modo === "cliente"
+    ? "Linguagem simples, sem jargão técnico, focada em o que fazer."
+    : "Linguagem técnica, com métricas do modelo e próximos passos operacionais.";
+  renderChips();
+}
+
+function renderChips() {
+  const container = document.getElementById("chips");
+  container.innerHTML = "";
+  CHIPS[modoAtual].forEach(texto => {
+    const btn = document.createElement("button");
+    btn.className = "chip";
+    btn.textContent = texto;
+    btn.onclick = () => {
+      document.getElementById("entrada").value = texto;
+      enviarMensagem();
+    };
+    container.appendChild(btn);
+  });
+}
+
+function adicionarMensagem(texto, tipo) {
+  const container = document.getElementById("mensagens");
+  const div = document.createElement("div");
+  div.className = "msg " + tipo;
+  div.textContent = texto;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+function mostrarDigitando() {
+  const container = document.getElementById("mensagens");
+  const div = document.createElement("div");
+  div.className = "digitando";
+  div.id = "indicador-digitando";
+  div.innerHTML = "<span></span><span></span><span></span>";
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removerDigitando() {
+  const el = document.getElementById("indicador-digitando");
+  if (el) el.remove();
+}
+
+async function enviarMensagem() {
+  const campo = document.getElementById("entrada");
+  const texto = campo.value.trim();
+  if (!texto) return;
+
+  const btn = document.getElementById("btn-enviar");
+  btn.disabled = true;
+  campo.value = "";
+
+  adicionarMensagem(texto, "usuario");
+  historico.push({ role: "user", content: texto });
+  mostrarDigitando();
+
+  try {
+    const resposta = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: PROMPTS[modoAtual],
+        messages: historico
+      })
+    });
+
+    const dados = await resposta.json();
+    removerDigitando();
+
+    const textoResposta = (dados.content || [])
+      .filter(bloco => bloco.type === "text")
+      .map(bloco => bloco.text)
+      .join("\n")
+      .trim() || "Não consegui gerar uma resposta agora. Tente novamente.";
+
+    adicionarMensagem(textoResposta, "assistente");
+    historico.push({ role: "assistant", content: textoResposta });
+  } catch (erro) {
+    removerDigitando();
+    adicionarMensagem("Houve um problema ao conectar com o assistente. Tente novamente em instantes.", "sistema");
+    console.error(erro);
+  } finally {
+    btn.disabled = false;
+    campo.focus();
+  }
+}
+
+document.getElementById("entrada").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    enviarMensagem();
+  }
+});
+
+// mensagem de boas-vindas
+adicionarMensagem(
+  "Olá! Sou o assistente da Central de Fraudes do Banco Vórtex. Escolha acima se você é cliente ou profissional do banco, e me conte sua dúvida.",
+  "assistente"
+);
+renderChips();
+</script>
+
+</body>
+</html>
