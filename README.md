@@ -10,6 +10,10 @@ conectam:
    fictício "Vórtex", que usa os números gerados pelo pipeline para explicar
    a situação de fraudes a **clientes** e **profissionais do banco**, em dois
    modos de linguagem diferentes.
+---
+
+## Print real do projeto  rodando
+<img width="1017" height="894" alt="image" src="https://github.com/user-attachments/assets/c5abaa60-c5f5-4167-a514-fec9eccfb8ac" />
 
 ---
 
